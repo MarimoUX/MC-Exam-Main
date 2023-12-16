@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Übungsprüfung</title>
+<meta name="author" content="Marimo Honda">
+<meta name="description" content="Base structure for multiple-choice exam">
+<style>
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #ffd6e0; 
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+img {
+    max-width: 100%;
+}
+
+h1 {
+    text-align: center;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#description {
+    text-align: center;
+}
+
+#description ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.option-label {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px;
+  margin-bottom: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.option-label input[type="radio"],
+.option-label input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.option-label .text-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.option-label .text-container span,
+.option-label .text-container label {
+  width: 100%;
+}
+
+.option-label span {
+    margin-top: 10px;
+    font-size: 0.9em; /* Optional: You can adjust the font size of the explanation */
+    color: #555; /* Optional: Adjust color for differentiation */
+}
+
+
+
+.quiz-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+p {
+    color: #333;
+}
+
+.options {
+    padding: 0;
+    margin-top: 10px;
+}
+
+.options li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+    margin-right: 10px;
+    background-color: #ffd6e0; /* Light Pink for unchecked */
+}
+
+input[type="radio"]:checked,
+input[type="checkbox"]:checked {
+    accent-color: #e44b7e; /* Pink for checked */
+}
+
+label {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: block;
+    align-items: center;
+}
+
+label input {
+    margin-right: 10px;
+}
+
+label:hover {
+    background-color: #f0f0f0;
+}
+
+#timer {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+z-index: 100; /* Ensures it stays above other content */
+background-color: #ffffff; /* white, because question div and background are different colors */
+display: none;
+}
+
+#timer-bar {
+    height: 20px;
+    width: 100%;
+    background-color: #9eded0; /* Initial color */
+    transition: width 1s linear, background-color 1s linear;
+}
+
+#time {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #50342b;
+}
+
+button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #f78da7;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #f1ccd1;
+}
+
+#explanation {
+    margin-top: 20px;
+    color: #333;
+}
+
+#question img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+hr {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+.explanation {
+    margin-top: 10px;
+    padding: 10px;
+    border: 4px solid #ffb0c3;
+    background-color: #f9f9f9;
+    display: none;
+}
+
+/* Added styles for highlighting correct and incorrect answers */
+.correct {
+    background-color: #c7e5d2; /* Light Green for correct answers */
+}
+
+.incorrect {
+    background-color: #ffd3e2; /* Light Red for incorrect answers */
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    z-index: 999; /* Ensure it's below the popup */
+}
+</style>
+</head>
+<body>
+    <div class="quiz-container" id="quiz-container">
+        <div id="timer" style="display: none;">
+            <div id="timer-bar">
+                <span id="time">90:00</span>
+            </div>
+        </div>        
+        <div id="description">
+            <h1>Herzlich willkommen zur<br>Übungsprüfung!</h1>
+            <ul>
+                <li>Für Fragen mit fünf Antwortmöglichkeiten erhältst du 1 Punkt für jede richtige Antwort.</li>
+                <li>Für Fragen mit vier Antwortmöglichkeiten kannst du mehrere richtige Antworten auswählen. Wenn du alle richtig hast, bekommst du 1 Punkt. Bei drei richtigen Antworten bekommst du noch 0,5 Punkte.</li>
+            </ul>
+            <p>Viel Erfolg!</p>
+            <button id="startTest">Test starten</button>
+        </div>
+
+        <div id="questions-container-five" style="display: none;">
+            <!-- Fragen mit fünf Antworten werden hier dynamisch hinzugefügt -->
+        </div>
+
+        <div id="questions-container-four" style="display: none;">
+            <!-- Fragen mit vier Antworten werden hier dynamisch hinzugefügt -->
+        </div>
+
+        <button type="button" id="checkAnswers" style="display: none;">Antworten Überprüfen</button>
+    </div>
+<script>
+const questions = [
+    // Example of a question with 5 single-choice options
+    {
+        question: `First question text. It can be multiple sentences.`,
+        image: "https://images.pexels.com/photos/5775/calculator-scientific.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+        options: [
+            { id: "q1o1", text: `First option text. It can be multiple sentences. This is a longer question text to test wrapping and see how it looks when the text exceeds the width of the container.`, correct: false, explanation: `Explanation for first option. It can be multiple sentences. This is a longer explanation to test for wrapping and see how it looks when the text exceeds the width of the container.` },
+            { id: "q1o2", text: `Second option text. It can be multiple sentences. This is the correct one. This is a longer question text to test wrapping and see how it looks when the text exceeds the width of the container.`, correct: true, explanation: `Explanation for second option. It can be multiple sentences.` },
+            { id: "q1o3", text: `Third option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for third option. It can be multiple sentences.` },
+            { id: "q1o4", text: `Fourth option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for fourth option. It can be multiple sentences.` },
+            { id: "q1o5", text: `Fifth option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for fifth option. It can be multiple sentences.` }
+        ],
+        allowedAnswers: 5
+    },
+    // Additional question with 5 single-choice options
+    {
+        question: `Second question text. It can be multiple sentences.`,
+        options: [
+            { id: "q2o1", text: `First option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for first option. It can be multiple sentences.` },
+            { id: "q2o2", text: `Second option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for second option. It can be multiple sentences.` },
+            { id: "q2o3", text: `Third option text. It can be multiple sentences. THis is the correct one`, correct: true, explanation: `Explanation for third option. It can be multiple sentences.` },
+            { id: "q2o4", text: `Fourth option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for fourth option. It can be multiple sentences.` },
+            { id: "q2o5", text: `Fifth option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for fifth option. It can be multiple sentences.` }
+        ],
+        allowedAnswers: 5
+    },
+    // Example of a question with 4 multiple-choice options
+    {
+        question: `Third question text. It can be multiple sentences.`,
+        options: [
+            { id: "q3o1", text: `First option text. It can be multiple sentences. this one is correct`, correct: true, explanation: `Explanation for first option. It can be multiple sentences.` },
+            { id: "q3o2", text: `Second option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for second option. It can be multiple sentences.` },
+            { id: "q3o3", text: `Third option text. It can be multiple sentences. this one is correct`, correct: true, explanation: `Explanation for third option. It can be multiple sentences.` },
+            { id: "q3o4", text: `Fourth option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for fourth option. It can be multiple sentences.` }
+        ],
+        allowedAnswers: 4
+    },
+    // Additional question with 4 multiple-choice options
+    {
+        question: `Fourth question text. It can be multiple sentences.`,
+        options: [
+            { id: "q4o1", text: `First option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for first option. It can be multiple sentences.` },
+            { id: "q4o2", text: `Second option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for second option. It can be multiple sentences.` },
+            { id: "q4o3", text: `Third option text. It can be multiple sentences.`, correct: false, explanation: `Explanation for third option. It can be multiple sentences.` },
+            { id: "q4o4", text: `Fourth option text. It can be multiple this one is correct`, correct: true, explanation: `Explanation for fourth option. It can be multiple sentences.` }
+        ],
+        allowedAnswers: 4
+    },
+    // ... other questions ...
+];
+
+const quizContainer = document.getElementById('quiz-container');
+const questionsContainerFive = document.getElementById('questions-container-five');
+const questionsContainerFour = document.getElementById('questions-container-four');
+
+// Separate questions based on 'allowedAnswers'
+const fiveOptionQuestions = questions.filter(q => q.allowedAnswers === 5);
+const fourOptionQuestions = questions.filter(q => q.allowedAnswers === 4);
+
+// Function to shuffle an array
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+// Shuffle each group of questions
+shuffle(fiveOptionQuestions);
+shuffle(fourOptionQuestions);
+
+// Function to render questions and shuffle options
+function renderQuestions(questions, container) {
+    questions.forEach((question, qIndex) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question';
+        let questionHTML = `<h4>${qIndex + 1}. ${question.question}</h4>`;
+        if (question.image) {
+            questionHTML += `<img src="${question.image}" alt="Question Image" style="max-width:100%; height:auto; margin-bottom: 10px;">`;
+        }
+        questionDiv.innerHTML = questionHTML;
+
+        const optionsList = document.createElement('ul');
+        const shuffledOptions = shuffle(question.options); // Shuffle the options
+        shuffledOptions.forEach(option => {
+            const listItem = document.createElement('li');
+            listItem.className = 'option';
+
+            const label = document.createElement('label');
+            label.htmlFor = option.id;
+            label.className = 'option-label';
+
+            const input = document.createElement('input');
+            input.type = question.allowedAnswers === 5 ? 'radio' : 'checkbox';
+            input.id = option.id;
+            input.name = question.allowedAnswers === 5 ? `answer${qIndex}` : option.id;
+
+            label.appendChild(input); // Append input inside label
+
+            const textContainer = document.createElement('div');
+            textContainer.className = 'text-container';
+
+            const textNode = document.createTextNode(option.text);
+            textContainer.appendChild(textNode); // Append text inside text container
+
+            const explanationSpan = document.createElement('span');
+            explanationSpan.id = 'explanation-' + option.id;
+            explanationSpan.style.display = 'none';
+            explanationSpan.textContent = `Explanation: ${option.explanation}`;
+
+            textContainer.appendChild(explanationSpan); // Append explanation inside text container
+
+            label.appendChild(textContainer); // Append text container inside label
+
+            listItem.appendChild(label); // Append label to the list item
+            optionsList.appendChild(listItem);
+        });
+
+        questionDiv.appendChild(optionsList);
+        container.appendChild(questionDiv);
+    });
+}
+
+// Function to shuffle an array
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// Render questions
+renderQuestions(fiveOptionQuestions, questionsContainerFive);
+renderQuestions(fourOptionQuestions, questionsContainerFour);
+
+// Global variable for timer interval
+let timerInterval;
+
+function startTimer() {
+    const startTime = 90 * 60; // 90 minutes in seconds 
+    let time = startTime;
+    const timerDisplay = document.getElementById('time');
+    const timerBar = document.getElementById('timer-bar');
+    document.getElementById('timer').style.display = 'block'; // Show the timer
+
+    timerInterval = setInterval(function() {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+
+        timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        const percentage = (time / startTime) * 100;
+        timerBar.style.width = `${percentage}%`;
+
+        // Change color based on remaining time
+        if (percentage <= 25) {
+            timerBar.style.backgroundColor = '#f9705c'; // Red color
+        } else if (percentage <= 50) {
+            timerBar.style.backgroundColor = '#feefc4'; // Yellow color
+        }
+
+        if (time <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('timer').style.display = 'none'; // Hide the timer
+            checkAndDisplayResults(); // Check and display results when time is up
+        } else {
+            time--;
+        }
+    }, 1000);
+}
+
+document.getElementById('startTest').addEventListener('click', function() {
+    startTimer(); // Start the timer
+    // Show quiz elements
+    document.getElementById('questions-container-five').style.display = 'block';
+    document.getElementById('questions-container-four').style.display = 'block';
+    document.getElementById('checkAnswers').style.display = 'block';
+    this.style.display = 'none'; // Hide the start button
+});
+
+document.getElementById('checkAnswers').addEventListener('click', function() {
+    clearInterval(timerInterval); // Stop the timer
+    document.getElementById('timer').style.display = 'none'; // Hide the timer
+    checkAndDisplayResults(); // Check and display results
+});
+
+function checkAndDisplayResults() {
+    let total = 0; // Total score
+    let maxTotal = 0; // Maximum possible score
+
+    questions.forEach((question, qIndex) => {
+        let correctAnswers = 0;
+        let chosenCorrectAnswers = 0;
+        let chosenAnswers = 0;
+
+        question.options.forEach(option => {
+            const input = document.getElementById(option.id);
+            const listItem = input.closest('.option');
+            const explanationSpan = document.getElementById('explanation-' + option.id);
+            explanationSpan.style.display = 'block'; 
+
+            if (question.allowedAnswers === 4) {
+                if (option.correct) {
+                    correctAnswers++;
+                    if (input.checked) {
+                        chosenCorrectAnswers++;
+                    }
+                }
+
+                if (input.checked) {
+                    chosenAnswers++;
+                }
+
+                if (input.checked && option.correct || !input.checked && !option.correct) {
+                    listItem.classList.add('correct');
+                    listItem.classList.remove('incorrect');
+                } else {
+                    listItem.classList.add('incorrect');
+                    listItem.classList.remove('correct');
+                }
+            } else {
+                if (input.checked) {
+                    if (option.correct) {
+                        listItem.classList.add('correct');
+                        listItem.classList.remove('incorrect');
+                    } else {
+                        listItem.classList.add('incorrect');
+                        listItem.classList.remove('correct');
+                    }
+                }
+            }
+
+            // Scoring logic
+            if (input.checked && option.correct) {
+                total++;
+            }
+        });
+
+        if (question.allowedAnswers === 4) {
+            if (chosenAnswers === correctAnswers && chosenCorrectAnswers === correctAnswers) {
+                total++;
+            }
+        } else {
+            maxTotal += question.options.length;
+        }
+    });
+
+    displayResults(total, maxTotal);
+    const checkAnswersButton = document.getElementById('checkAnswers');
+    checkAnswersButton.textContent = 'Restart Test';
+    checkAnswersButton.removeEventListener('click', checkAndDisplayResults); // Remove the old event listener
+    checkAnswersButton.addEventListener('click', function() {
+        location.reload(); // Refresh the page
+    });
+}
+
+function displayResults(total, maxTotal) {
+    // Calculate and display grade
+    const grade = (total / maxTotal * 5) + 1;
+    let resultText = "";
+    if (grade < 4) {
+        resultText = `<div style="text-align: center;">Gut gemacht, aber es gibt noch Raum für Verbesserung.<br><br> Du hast ${total} von ${maxTotal} Punkten erreicht.<br><br>Deine Note: <strong>${grade.toFixed(2)}</strong>. Weiter so und viel Erfolg beim nächsten Mal!</div>`;
+    } else {
+        resultText = `<div style="text-align: center;"><strong>Herzlichen Glückwunsch!</strong><br><br>Du hast ${total} von ${maxTotal} Punkten erreicht.<br><br>Deine Note: <strong>${grade.toFixed(2)}</strong>.<br><br>Well done!<br>Viel Glück und Erfolg bei der Prüfung!!</div>`;
+    }
+
+    // Create and show the overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    document.body.appendChild(overlay);
+
+    // Create and show the results popup
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.left = '50%';
+    popup.style.top = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.backgroundColor = 'white';
+    popup.style.padding = '20px';
+    popup.style.border = '1px solid black';
+    popup.style.borderRadius = '5px';
+    popup.style.zIndex = '1000';
+    popup.innerHTML = `<p>${resultText}</p><button id="closePopup">Meine Antworten anzeigen</button>`;
+
+    // Check if the screen width is less than a certain value (e.g., 768px) for mobile
+    if (window.innerWidth < 768) {
+        popup.style.width = '80%'; // Set the width for mobile screens
+    }
+
+    document.body.appendChild(popup);
+
+    document.getElementById('closePopup').addEventListener('click', () => {
+        popup.remove();
+        overlay.remove(); // Also remove the overlay
+    });
+
+    // Jump to the top of the page
+    window.scrollTo(0, 0);
+}
+    
+</script>
+</body>
+</html>
