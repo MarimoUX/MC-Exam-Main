@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MC Exam Template</title>
+<title>Statistik I Übungsprüfung</title>
 <meta name="author" content="Marimo Honda">
 <meta name="description" content="Base structure for multiple-choice exam">
 <style>
@@ -68,6 +68,8 @@ ul {
     font-size: 0.9em; /* Optional: You can adjust the font size of the explanation */
     color: #555; /* Optional: Adjust color for differentiation */
 }
+
+
 
 .quiz-container {
     max-width: 600px;
@@ -220,7 +222,7 @@ hr {
             </div>
         </div>        
         <div id="description">
-            <h1>Herzlich willkommen zur<br>Übungsprüfung!</h1>
+            <h1>Herzlich willkommen zur<br>Statistik I Übungsprüfung!</h1>
             <ul>
                 <li>Für Fragen mit fünf Antwortmöglichkeiten erhältst du 1 Punkt für jede richtige Antwort.</li>
                 <li>Für Fragen mit vier Antwortmöglichkeiten kannst du mehrere richtige Antworten auswählen. Wenn du alle richtig hast, bekommst du 1 Punkt. Bei drei richtigen Antworten bekommst du noch 0,5 Punkte.</li>
@@ -348,7 +350,7 @@ function renderQuestions(questions, container) {
             const explanationSpan = document.createElement('span');
             explanationSpan.id = 'explanation-' + option.id;
             explanationSpan.style.display = 'none';
-            explanationSpan.textContent = `Explanation: ${option.explanation}`;
+            explanationSpan.textContent = `${option.explanation}`;
 
             textContainer.appendChild(explanationSpan); // Append explanation inside text container
 
@@ -427,65 +429,73 @@ document.getElementById('checkAnswers').addEventListener('click', function() {
 });
 
 function checkAndDisplayResults() {
-    let total = 0; // Total score
-    let maxTotal = 0; // Maximum possible score
+  let total = 0; // Total score
+  let maxTotal = 0; // Maximum possible score
 
-    questions.forEach((question, qIndex) => {
-        let correctAnswers = 0;
-        let chosenCorrectAnswers = 0;
-        let chosenAnswers = 0;
+  questions.forEach((question, qIndex) => {
+    let correctAnswers = 0;
+    let chosenCorrectAnswers = 0;
+    let chosenAnswers = 0;
 
-        question.options.forEach(option => {
-            const input = document.getElementById(option.id);
-            const listItem = input.closest('.option');
-            const explanationSpan = document.getElementById('explanation-' + option.id);
-            explanationSpan.style.display = 'block'; 
+    question.options.forEach(option => {
+      const input = document.getElementById(option.id);
+      const listItem = input.closest('.option');
+      const explanationSpan = document.getElementById('explanation-' + option.id);
 
-            if (question.allowedAnswers === 4) {
-                if (option.correct) {
-                    correctAnswers++;
-                    if (input.checked) {
-                        chosenCorrectAnswers++;
-                    }
-                }
-
-                if (input.checked) {
-                    chosenAnswers++;
-                }
-
-                if (input.checked && option.correct || !input.checked && !option.correct) {
-                    listItem.classList.add('correct');
-                    listItem.classList.remove('incorrect');
-                } else {
-                    listItem.classList.add('incorrect');
-                    listItem.classList.remove('correct');
-                }
-            } else {
-                if (input.checked) {
-                    if (option.correct) {
-                        listItem.classList.add('correct');
-                        listItem.classList.remove('incorrect');
-                    } else {
-                        listItem.classList.add('incorrect');
-                        listItem.classList.remove('correct');
-                    }
-                }
-            }
-
-            // Scoring logic
-            if (input.checked && option.correct) {
-                total++;
-            }
-        });
-
-        if (question.allowedAnswers === 4) {
-            if (chosenAnswers === correctAnswers && chosenCorrectAnswers === correctAnswers) {
-                total++;
-            }
+      // Display explanation only for the selected option in single-choice questions
+      if (question.allowedAnswers === 5) {
+        if (input.checked) {
+          explanationSpan.style.display = 'block';
         } else {
-            maxTotal += question.options.length;
+          explanationSpan.style.display = 'none';
         }
+      } else {
+        explanationSpan.style.display = 'block';
+      }
+
+      if (question.allowedAnswers === 4) {
+        if (option.correct) {
+          correctAnswers++;
+          if (input.checked) {
+            chosenCorrectAnswers++;
+          }
+        }
+
+        if (input.checked) {
+          chosenAnswers++;
+        }
+
+        if (input.checked && option.correct || !input.checked && !option.correct) {
+          listItem.classList.add('correct');
+          listItem.classList.remove('incorrect');
+        } else {
+          listItem.classList.add('incorrect');
+          listItem.classList.remove('correct');
+        }
+      } else {
+        if (input.checked) {
+          if (option.correct) {
+            listItem.classList.add('correct');
+            listItem.classList.remove('incorrect');
+            total++; // Add 1 point for correct answer
+          } else {
+            listItem.classList.add('incorrect');
+            listItem.classList.remove('correct');
+          }
+        }
+      }
     });
+
+    if (question.allowedAnswers === 4) {
+      if (chosenAnswers === correctAnswers && chosenCorrectAnswers === correctAnswers) {
+        total++; // Add 1 point for all correct answers
+      } else if (chosenCorrectAnswers === 3) {
+        total += 0.5; // Add 0.5 points for 3 correct answers
+      }
+    } else {
+      maxTotal += question.options.length;
+    }
+  });
 
     displayResults(total, maxTotal);
     const checkAnswersButton = document.getElementById('checkAnswers');
