@@ -52,4 +52,4 @@ Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on our code of cond
 This project is released under MIT License. For more details, see the LICENSE file.
 
 ## Acknowledgements
-A special thanks to [@JungerMin](https://github.com/JungerMin) for their valuable contributions and support in setting up the MC Exam Base project. Their expertise and insights were instrumental in bringing this project to fruition.
+A special thanks to [@Mocchibird](https://github.com/JungerMin) for their valuable contributions and support in setting up the MC Exam Base project. Their expertise and insights were instrumental in bringing this project to fruition.
